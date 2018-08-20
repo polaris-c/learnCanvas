@@ -13,6 +13,7 @@
   <body>
     <canvas class="myCanvas">
       <p>Add suitable fallback here.</p>
+      111
     </canvas>
 
     <script>
@@ -22,36 +23,53 @@
       var height = canvas.height = window.innerHeight;
       var ctx = canvas.getContext('2d');
 
-      ctx.fillStyle = 'rgb(0,0,0)';
-      ctx.fillRect(0,0,width,height);
-
-      ctx.translate(width/2, height/2);
-
-      function degToRad(degrees) {
-        return degrees * Math.PI / 180;
-      };
-
-      function rand(min, max) {
-        return Math.floor(Math.random() * (max-min+1)) + (min);
+      var sun = new Image();
+      var moon = new Image();
+      var earth = new Image();
+      function init(){
+        sun.src = 'https://mdn.mozillademos.org/files/1456/Canvas_sun.png';
+        moon.src = 'https://mdn.mozillademos.org/files/1443/Canvas_moon.png';
+        earth.src = 'https://mdn.mozillademos.org/files/1429/Canvas_earth.png';
+        window.requestAnimationFrame(draw);
       }
 
-      var length = 5;
-      var moveOffset = 20;
+      function draw() {
+        // var ctx = document.querySelector('canvas').getContext('2d');
 
-      for(var i = 0; i < length; i++) {
-        ctx.fillStyle = 'rgba(' + (255-length) + ', 0, ' + (255-length) + ', 0.9)';
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.clearRect(0, 0, 600, 600); // clear canvas
+
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.strokeStyle = 'rgba(0,153,255,0.4)';
+        ctx.save();
+        ctx.translate(300, 300);
+
+        // Earth
+        var time = new Date();
+        ctx.rotate( ((2*Math.PI)/60)*time.getSeconds() + ((2*Math.PI)/60000)*time.getMilliseconds() );
+        ctx.translate(150,0);
+        ctx.fillRect(0,-12,50,24); // Shadow
+        ctx.drawImage(earth,-12,-12);
+
+        // Moon
+        ctx.save();
+        ctx.rotate( ((2*Math.PI)/6)*time.getSeconds() + ((2*Math.PI)/6000)*time.getMilliseconds() );
+        ctx.translate(0,28.5);
+        ctx.drawImage(moon,-3.5,-3.5);
+        ctx.restore();
+
+        ctx.restore();
+        
         ctx.beginPath();
-        ctx.moveTo(moveOffset, moveOffset);
-        ctx.lineTo(moveOffset+length, moveOffset);
-        var triHeight = length/2 * Math.tan(degToRad(60));
-        ctx.lineTo(moveOffset+(length/2), moveOffset+triHeight);
-        ctx.lineTo(moveOffset, moveOffset);
-        ctx.fill();
+        ctx.arc(300, 300, 150, 0, Math.PI*2, false); // Earth orbit
+        ctx.stroke();
+       
+        ctx.drawImage(sun,0,0,600,600);
 
-        length--;
-        moveOffset += 1;
-        ctx.rotate(degToRad(30));  // 旋转画布
+        window.requestAnimationFrame(draw);
       }
+
+      init();
 
     </script>
   </body>
