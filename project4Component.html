@@ -9,8 +9,10 @@
 		    overflow: hidden;
 		 }
 		canvas {
-			margin: 10px;
-			background-color: #999999;
+			/*margin: 10px;*/
+			margin-left: 20px;
+			margin-top: 10px;
+			/*background-color: #999999;*/
 		}
 		.component {
 			background-color: #EFEFEF;
@@ -35,17 +37,25 @@
 	<script type="text/javascript">
 		let canvas = document.querySelector('canvas')
 		let ctx = canvas.getContext('2d')
+		let width = canvas.width = 960
+		let height = canvas.height = 540
 		let one = document.querySelector('#one')
 		let two = document.querySelector('#two')
 		let three = document.querySelector('#three')
 		let four = document.querySelector('#four')
 
+		let offSetLeft = canvas.offsetLeft
+		let offSetTop = canvas.offsetTop
+
 		let twoPointsFlag = false
 		let clickCoordinates = []
-		let clickFlag = 0
+		let clickNum = 0
 		let originXY = []
 		let destinationXY = []
 		let activeFunction = null
+
+		let image = new Image()
+		image.src = '../../img/X299.jpg'
 
 		let cursor = {
 			x: 0,
@@ -62,12 +72,23 @@
 		}
 		let objectOne = {
 			originXY: [],
-			destinationXY: []
+			destinationXY: [],
+			drawFigure: function() {
+				ctx.strokeStyle = 'rgb(250, 0, 0)'
+				ctx.strokeRect(this.originXY[0], this.originXY[1], this.destinationXY[0] - this.originXY[0], this.destinationXY[1]- this.originXY[1])
+			}
 		}
 		let objectTwo = {
 			originXY: [],
 			destinationXY: [],
 			objectLength: null,
+			drawFigure: function() {
+				ctx.strokeStyle = 'rgb(0, 250, 0)'
+				ctx.beginPath()
+				ctx.moveTo(this.originXY[0], this.originXY[1])
+				ctx.lineTo(this.destinationXY[0], this.destinationXY[1])
+				ctx.stroke()
+			},
 			calculate: function() {
 
 			}
@@ -76,6 +97,13 @@
 			originXY: [],
 			destinationXY: [],
 			objectAngle: null,
+			drawFigure: function() {
+				ctx.strokeStyle = 'rgb(0, 0, 250)'
+				ctx.beginPath()
+				ctx.moveTo(this.originXY[0], this.originXY[1])
+				ctx.lineTo(this.destinationXY[0], this.destinationXY[1])
+				ctx.stroke()
+			},
 			calculate: function() {
 				
 			}
@@ -83,6 +111,15 @@
 		let objectFour = {
 			coordinates: [],
 			objectNum: null,
+			drawFigure: function() {
+				ctx.fillStyle = 'rgb(250, 250, 0)'
+				for(i = 0; i < objectFour.coordinates.length; i++) {
+					ctx.beginPath()
+					ctx.arc(objectFour.coordinates[i][0], objectFour.coordinates[i][1], 2, 0, Math.PI*2, true)
+					ctx.closePath()
+					ctx.fill()
+				}
+			},
 			calculate: function() {
 				this.objectNum = this.coordinates.length
 			}
@@ -96,15 +133,39 @@
 		three.addEventListener('click', threeFunction)
 		four.addEventListener('click', fourFunction)
 
+		image.addEventListener('load', loadImage)
+
+		function loadImage() {
+			ctx.drawImage(image, offSetLeft, offSetTop)
+			// console.log('drawImage: ', image)
+		}
+
+		function setImage() {
+			loadImage()
+			if(!(objectOne.originXY.length === 0) && !(objectOne.destinationXY.length === 0)) {
+				objectOne.drawFigure()
+			} 
+			if(!(objectTwo.originXY.length === 0) && !(objectTwo.destinationXY.length === 0)) {
+				objectTwo.drawFigure()
+			} 
+			if(!(objectThree.originXY.length === 0) && !(objectThree.destinationXY.length === 0)) {
+				objectThree.drawFigure()
+			} 
+			if(!(objectFour.objectNum === 0)) {
+				objectFour.drawFigure()
+			}
+		}
+
 		function clear() {
 			ctx.fillStyle = 'rgba(200, 200, 200, 0.99)'
 			ctx.fillRect(0, 0, canvas.width, canvas.height)
+			setImage()
 		}
 
 		function clearVar() {
 			twoPointsFlag = false
 			clickCoordinates = []
-			clickFlag = 0
+			clickNum = 0
 			originXY = []
 		  destinationXY = []
 			activeFunction = null
@@ -112,14 +173,15 @@
 
 		function mouseMove(event) {
 			clear()
-			cursor.x = event.clientX - 10
-			cursor.y = event.clientY - 10
+			cursor.x = event.clientX - offSetLeft
+			cursor.y = event.clientY - offSetTop
 
 			if (cursor.x >= canvas.width || cursor.x <= 0 ||
 				cursor.y >= canvas.height || cursor.y <= 0) {
 				console.log('Out Of Range')
 				clearVar()
 			}
+
 			switch (activeFunction) {
 				case 1:
 				  handleOne()
@@ -140,18 +202,18 @@
 
 		function mouseClick(event) {
 			if (activeFunction) {
-				clickFlag++
-				console.log(clickFlag)
+				clickNum++
+				console.log(clickNum)
 				if(activeFunction === 4) {
 					console.log('clickCoordinates: ', clickCoordinates)
-					clickCoordinates.push([event.clientX - 10, event.clientY - 10])
+					clickCoordinates.push([cursor.x, cursor.y])
 				} else {
-					if (clickFlag % 2 === 1) {
+					if (clickNum % 2 === 1) {
 						clear()
-						originXY = [event.clientX - 10, event.clientY - 10]
+						originXY = [cursor.x, cursor.y]
 						twoPointsFlag = true
 					} else {
-						destinationXY = [event.clientX - 10, event.clientY - 10]
+						destinationXY = [cursor.x, cursor.y]
 						twoPointsFlag = false
 					}
 				}
@@ -179,10 +241,9 @@
 				ctx.strokeStyle = 'rgb(250, 50, 50)'
 				ctx.strokeRect(originXY[0], originXY[1], cursor.x - originXY[0], cursor.y - originXY[1])
 			} else if(originXY.length) {
-				ctx.strokeStyle = 'rgb(250, 0, 0)'
-				ctx.strokeRect(originXY[0], originXY[1], destinationXY[0] - originXY[0], destinationXY[1]- originXY[1])
 				objectOne.originXY = originXY
 				objectOne.destinationXY = destinationXY
+				objectOne.drawFigure()
 				clearVar()
 				console.log(objectOne)
 			} else {
@@ -202,13 +263,9 @@
 				ctx.lineTo(cursor.x, cursor.y)
 				ctx.stroke()
 			} else if(originXY.length) {
-				ctx.strokeStyle = 'rgb(0, 250, 0)'
-				ctx.beginPath()
-				ctx.moveTo(originXY[0], originXY[1])
-				ctx.lineTo(destinationXY[0], destinationXY[1])
-				ctx.stroke()
 				objectTwo.originXY = originXY
 				objectTwo.destinationXY = destinationXY
+				objectTwo.drawFigure()
 				clearVar()
 				console.log(objectTwo)
 			} else {
@@ -228,15 +285,11 @@
 				ctx.lineTo(cursor.x, cursor.y)
 				ctx.stroke()
 			} else if(originXY.length) {
-				ctx.strokeStyle = 'rgb(0, 0, 250)'
-				ctx.beginPath()
-				ctx.moveTo(originXY[0], originXY[1])
-				ctx.lineTo(destinationXY[0], destinationXY[1])
-				ctx.stroke()
 				objectThree.originXY = originXY
 				objectThree.destinationXY = destinationXY
+				objectThree.drawFigure()
 				clearVar()
-				console.log(objectThree)
+				console.log('objectThree: ', objectThree)
 			} else {
 				cursor.drawCursor()
 			}
@@ -247,15 +300,9 @@
 			switchFunction(4)
 		}
 		function handleFour() {
-			ctx.fillStyle = 'rgb(250, 250, 0)'
-			for(i = 0; i < clickCoordinates.length; i++) {
-				ctx.beginPath()
-				ctx.arc(clickCoordinates[i][0], clickCoordinates[i][1], 2, 0, Math.PI*2, true)
-				ctx.closePath()
-				ctx.fill()
-			}
 			objectFour.coordinates = clickCoordinates
 			objectFour.calculate()
+			objectFour.drawFigure()
 			cursor.drawCursor()
 		}
 	</script>
