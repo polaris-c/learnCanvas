@@ -27,10 +27,10 @@
 		</div>
 
 		<div>
-			<button id="one">The One</button>
-			<button id="two">The Two</button>
-			<button id="three">The Three</button>
-			<button id="four">The Four</button>
+			<button id="one">The Rectangle Box</button>
+			<button id="two">The Line Length</button>
+			<button id="three">The Line Angle</button>
+			<button id="four">The Dot</button>
 		</div>
 	</div>
 
@@ -56,6 +56,7 @@
 
 		let image = new Image()
 		image.src = '../../img/X299.jpg'
+		console.log('naturalWidth', image.naturalWidth, 'naturalHeight: ', image.naturalHeight)
 
 		let cursor = {
 			x: 0,
@@ -125,6 +126,11 @@
 			}
 		}
 
+		const RECTANGLE_BOX = 1
+		const LINE_LENGTH = 2
+		const LINE_ANGLE = 3
+		const DOT_COORDINATE = 4
+
 		canvas.addEventListener('mousemove', mouseMove)
 		canvas.addEventListener('click', mouseClick)
 
@@ -136,7 +142,7 @@
 		image.addEventListener('load', loadImage)
 
 		function loadImage() {
-			ctx.drawImage(image, offSetLeft, offSetTop)
+			ctx.drawImage(image, 0, 0, width, height)
 			// console.log('drawImage: ', image)
 		}
 
@@ -182,29 +188,34 @@
 				clearVar()
 			}
 
-			switch (activeFunction) {
-				case 1:
-				  handleOne()
-					break
-				case 2:
-					handleTwo()
-					break
-				case 3:
-					handleThree()
-					break
-				case 4:
-					handleFour()
-					break
-				default:
-					cursor.drawCursor()
+			if (activeFunction) {
+				switch (activeFunction) {
+					case RECTANGLE_BOX:
+					  handleOne()
+						break
+					case LINE_LENGTH:
+						handleTwo()
+						break
+					case LINE_ANGLE:
+						handleThree()
+						break
+					case DOT_COORDINATE:
+						handleFour()
+						break
+					default:
+						cursor.drawCursor()
+				}
+			} else {
+				console.log('Null Function')
 			}
+			
 		}
 
 		function mouseClick(event) {
 			if (activeFunction) {
 				clickNum++
 				console.log(clickNum)
-				if(activeFunction === 4) {
+				if(activeFunction === DOT_COORDINATE) {
 					console.log('clickCoordinates: ', clickCoordinates)
 					clickCoordinates.push([cursor.x, cursor.y])
 				} else {
@@ -234,7 +245,7 @@
 
 		function oneFunction(event) {
 			console.log('ONE')
-			switchFunction(1)
+			switchFunction(RECTANGLE_BOX)
 		}
 		function handleOne() {
 			if (twoPointsFlag) {
@@ -253,7 +264,7 @@
 
 		function twoFunction(event) {
 			console.log('TWO')
-			switchFunction(2)
+			switchFunction(LINE_LENGTH)
 		}
 		function handleTwo() {
 			if (twoPointsFlag) {
@@ -275,7 +286,7 @@
 
 		function threeFunction(event) {
 			console.log('THREE')
-			switchFunction(3)
+			switchFunction(LINE_ANGLE)
 		}
 		function handleThree() {
 			if (twoPointsFlag) {
@@ -297,7 +308,7 @@
 
 		function fourFunction(event) {
 			console.log('FOUR')
-			switchFunction(4)
+			switchFunction(DOT_COORDINATE)
 		}
 		function handleFour() {
 			objectFour.coordinates = clickCoordinates
