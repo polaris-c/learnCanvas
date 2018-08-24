@@ -27,10 +27,10 @@
 		</div>
 
 		<div>
-			<button id="one">The Rectangle Box</button>
-			<button id="two">The Line Length</button>
-			<button id="three">The Line Angle</button>
-			<button id="four">The Dot</button>
+			<div><button id="one">The Rectangle Box</button></div>
+			<div><button id="two">The Line Length</button></div>
+			<div><button id="three">The Line Angle</button></div>
+			<div><button id="four">The Dot</button></div>
 		</div>
 	</div>
 
@@ -39,10 +39,17 @@
 		let ctx = canvas.getContext('2d')
 		let width = canvas.width = 960
 		let height = canvas.height = 540
+
 		let one = document.querySelector('#one')
 		let two = document.querySelector('#two')
 		let three = document.querySelector('#three')
 		let four = document.querySelector('#four')
+
+		let myDocEL = document.getElementsByTagName('body')
+		let myBody = myDocEL[0] //.item(0)
+		let myBodyDiv = myBody.getElementsByTagName('div')
+		let divOne = myBodyDiv.item(3)
+		let buttonDiv = null
 
 		let offSetLeft = canvas.offsetLeft
 		let offSetTop = canvas.offsetTop
@@ -193,7 +200,7 @@
 			if (cursor.x >= canvas.width || cursor.x <= 0 ||
 					cursor.y >= canvas.height || cursor.y <= 0) {
 				console.log('Out Of Range')
-				clearVar()
+				// clearVar()
 			}
 
 			if (activeFunction) {
@@ -208,7 +215,7 @@
 						handleThree()
 						break
 					case DOT_COORDINATE:
-						handleFour()
+						// handleFour()
 						break
 					default:
 						cursor.drawCursor()
@@ -221,20 +228,25 @@
 
 		function mouseClick(event) {
 			if (activeFunction) {
-				clickNum++
-				console.log(clickNum)
-				if(activeFunction === DOT_COORDINATE) {
-					console.log('clickCoordinates: ', clickCoordinates)
-					clickCoordinates.push([cursor.x, cursor.y])
-				} else {
-					if (clickNum % 2 === 1) {
-						clear()
-						originXY = [cursor.x, cursor.y]
-						twoPointsFlag = true
-					} else {
-						destinationXY = [cursor.x, cursor.y]
-						twoPointsFlag = false
-					}
+				
+				switch (activeFunction) {
+					case RECTANGLE_BOX:
+					case LINE_LENGTH:
+					case LINE_ANGLE:
+						if(!twoPointsFlag) {
+							originXY = [cursor.x, cursor.y]
+							twoPointsFlag = !twoPointsFlag
+						} else {
+							destinationXY = [cursor.x, cursor.y]
+							twoPointsFlag = !twoPointsFlag
+						}
+						break
+					case DOT_COORDINATE:
+						clickCoordinates.push([cursor.x, cursor.y])
+						handleFour()
+						break
+					default:
+						console.log('ERROR: Undefined Function')
 				}
 			} else {
 				console.log('Null Click')
@@ -243,6 +255,11 @@
 
 		function switchFunction(functionFlag) {
 			clearVar()
+			if(buttonDiv) {
+				buttonDiv.style.background = "#EFEFEF"
+			}
+			buttonDiv = myBodyDiv.item(functionFlag + 2)
+
 			if (activeFunction === functionFlag) {
 				activeFunction = null
 			} else {
@@ -254,18 +271,19 @@
 		function oneFunction(event) {
 			console.log('ONE')
 			switchFunction(RECTANGLE_BOX)
+			buttonDiv.style.background = "rgb(255,200,200)"
 		}
 		function handleOne() {
 			if (twoPointsFlag) {
 				ctx.strokeStyle = 'rgb(250, 50, 50)'
 				ctx.strokeRect(originXY[0], originXY[1], 
-												cursor.x - originXY[0], cursor.y - originXY[1])
+												cursor.x - originXY[0], cursor.y - originXY[1])		
 			} else if(originXY.length) {
 				objectOne.originXY = originXY
 				objectOne.destinationXY = destinationXY
 				objectOne.drawFigure()
-				clearVar()
-				console.log(objectOne)
+				// clearVar()
+				// console.log(objectOne)
 			} else {
 				cursor.drawCursor()
 			}
@@ -274,6 +292,7 @@
 		function twoFunction(event) {
 			console.log('TWO')
 			switchFunction(LINE_LENGTH)
+			buttonDiv.style.background = "rgb(255,200,200)"
 		}
 		function handleTwo() {
 			if (twoPointsFlag) {
@@ -286,8 +305,8 @@
 				objectTwo.originXY = originXY
 				objectTwo.destinationXY = destinationXY
 				objectTwo.drawFigure()
-				clearVar()
-				console.log(objectTwo)
+				// clearVar()
+				// console.log(objectTwo)
 			} else {
 				cursor.drawCursor()
 			}
@@ -296,6 +315,7 @@
 		function threeFunction(event) {
 			console.log('THREE')
 			switchFunction(LINE_ANGLE)
+			buttonDiv.style.background = "rgb(255,200,200)"
 		}
 		function handleThree() {
 			if (twoPointsFlag) {
@@ -308,8 +328,8 @@
 				objectThree.originXY = originXY
 				objectThree.destinationXY = destinationXY
 				objectThree.drawFigure()
-				clearVar()
-				console.log('objectThree: ', objectThree)
+				// clearVar()
+				// console.log('objectThree: ', objectThree)
 			} else {
 				cursor.drawCursor()
 			}
@@ -318,6 +338,7 @@
 		function fourFunction(event) {
 			console.log('FOUR')
 			switchFunction(DOT_COORDINATE)
+			buttonDiv.style.background = "rgb(255,200,200)"
 		}
 		function handleFour() {
 			objectFour.coordinates = clickCoordinates
